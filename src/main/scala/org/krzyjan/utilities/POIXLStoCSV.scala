@@ -13,13 +13,13 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 
 
 class POIXLStoCSV extends XLStoCSV {
-  def convert(in: InputStream): Vector[Vector[String]] = POIXLStoCSV.convert(in)
+  def convert(in: InputStream, sheetIdx: Int): Vector[Vector[String]] = POIXLStoCSV.convert(in, sheetIdx)
 }
 
 object POIXLStoCSV {
   val dataFormatter = new DataFormatter(true)
 
-  def convert(in: InputStream): Vector[Vector[String]] = {
+  def convert(in: InputStream, sheetIdx: Int = 0): Vector[Vector[String]] = {
     val workbook = WorkbookFactory.create(in)
     val formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator()
     val numberOfSheets = workbook.getNumberOfSheets()
@@ -71,7 +71,13 @@ object POIXLStoCSV {
         resultSheet
       }
     }
+    
+    def processTargetSheets(resultSheet: Vector[Vector[String]]): Vector[Vector[String]] = {
+      val sheet = workbook.getSheetAt(sheetIdx)
+      resultSheet ++ processRows(Vector(), sheet, 0, sheet.getLastRowNum() + 1)
+    }
 
-    processSheets(Vector(), 0)
+    //processSheets(Vector(), 0)
+    processTargetSheets(Vector())
   }  
 }
